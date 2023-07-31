@@ -1,4 +1,6 @@
-export interface User {
+import { IsNotEmpty, IsString } from 'class-validator';
+
+export class User {
   id: string; // uuid v4
   login: string;
   password: string;
@@ -7,12 +9,22 @@ export interface User {
   updatedAt: number; // timestamp of last update
 }
 
-export interface CreateUserDto {
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
   login: string;
+
+  @IsString()
+  @IsNotEmpty()
   password: string;
 }
 
-export interface UpdatePasswordDto {
+export class UpdatePasswordDto {
+  @IsString()
+  @IsNotEmpty()
   oldPassword: string; // previous password
+
+  @IsString()
+  @IsNotEmpty()
   newPassword: string; // new password
 }

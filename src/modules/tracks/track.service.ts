@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ApiFavoriteService } from 'src/api/modules/api-favorites/favorite.service';
 import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
-import { Track } from 'src/modules/tracks/track.model';
+import {
+  CreateTrackDto,
+  Track,
+  UpdateTrackDto,
+} from 'src/modules/tracks/track.model';
 import { v4 } from 'uuid';
 
 @Injectable()
@@ -20,7 +24,7 @@ export class TrackService {
     return this.apiTrackService.getById(id);
   }
 
-  create(body: Track): Track {
+  create(body: CreateTrackDto): Track {
     const tracks = this.apiTrackService.getAll();
 
     const track: Track = {
@@ -33,7 +37,7 @@ export class TrackService {
     return track;
   }
 
-  update(body: Track, id: string): Track {
+  update(body: UpdateTrackDto, id: string): Track {
     const tracks = this.apiTrackService.getAll<Track>();
     const index = tracks.findIndex((track) => track.id === id);
     tracks[index] = {

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Album } from 'src/modules/albums/album.model';
+import {
+  Album,
+  CreateAlbumDto,
+  UpdateAlbumDto,
+} from 'src/modules/albums/album.model';
 import { v4 } from 'uuid';
 import { ApiAlbumService } from 'src/api/modules/api-albums/album.service';
 import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
@@ -22,7 +26,7 @@ export class AlbumService {
     return this.apiAlbumService.getById(id);
   }
 
-  create(body: Album): Album {
+  create(body: CreateAlbumDto): Album {
     const albums = this.apiAlbumService.getAll();
 
     const album: Album = {
@@ -35,7 +39,7 @@ export class AlbumService {
     return album;
   }
 
-  update(body: Album, id: string): Album {
+  update(body: UpdateAlbumDto, id: string): Album {
     const albums = this.apiAlbumService.getAll<Album>();
     const index = albums.findIndex((album) => album.id === id);
     albums[index] = {

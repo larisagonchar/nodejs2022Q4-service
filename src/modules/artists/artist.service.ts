@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
 import { ApiAlbumService } from 'src/api/modules/api-albums/album.service';
-import { Artist } from './artist.model';
+import { Artist, CreateArtistDto, UpdateArtistDto } from './artist.model';
 import { ApiArtistService } from 'src/api/modules/api-artists/artist.service';
 import { ApiFavoriteService } from 'src/api/modules/api-favorites/favorite.service';
 
@@ -24,7 +24,7 @@ export class ArtistService {
     return this.apiArtistService.getById(id);
   }
 
-  create(body: Artist): Artist {
+  create(body: CreateArtistDto): Artist {
     const artists = this.apiArtistService.getAll();
     const artist: Artist = {
       id: v4(),
@@ -36,7 +36,7 @@ export class ArtistService {
     return artist;
   }
 
-  update(body: Artist, id: string): Artist {
+  update(body: UpdateArtistDto, id: string): Artist {
     const artists = this.apiArtistService.getAll<Artist>();
     const index = artists.findIndex((artist) => artist.id === id);
     artists[index] = {
