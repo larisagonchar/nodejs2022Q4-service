@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  node:
+    build: .
+    image: node
+    restart: always
+    environment:
+      - PORT=${PORT}
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - postgres
+    container_name: larisagonchar-node
+    volumes:
+      - ./logs:/usr/app/logs
+      - ./src:/usr/app/src
+    networks:
+      - network
+
+  postgres:
+    build: ./db/
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - .env
+    container_name: larisagonchar-postgres
+    volumes:
+      - db_log_volume:/logs:z
+      - db_data_volume:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+      - network
+
+volumes: 
+  db_data_volume:
+  db_log_volume:
+networks:
+  network:
+    driver: bridge 
