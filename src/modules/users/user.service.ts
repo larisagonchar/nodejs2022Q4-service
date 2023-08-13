@@ -1,60 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
 import { CreateUserDto, UpdatePasswordDto, User } from './user.model';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
 
-  getAllData(): User[] {
-    const users: User[] = JSON.parse(JSON.stringify(this.users));
-    return users.map((user) => {
-      delete user.password;
-      return user;
+  async getAllData() {
+    const users: UserEntity[] = await this.userRepository.find();
+    return users.map((user) => user.toResponse());
+  }
+
+  async getDataById(id: string) {
+    const user = await this.userRepository.findOneBy({
+      id,
+    });
+
+    return user ? user.toResponse() : user;
+  }
+
+  async getFullDataById(id: string) {
+    return await this.userRepository.findOneBy({
+      id,
     });
   }
 
-  getDataById(id: string): User {
-    const users: User[] = JSON.parse(JSON.stringify(this.users));
-    return users.find((user) => user.id === id);
+  async create(userDto: CreateUserDto) {
+    const createdUser = this.userRepository.create(userDto);
+    return (await this.userRepository.save(createdUser)).toResponse();
   }
 
-  create(body: CreateUserDto): User {
-    const user = {
-      id: v4(),
-      login: body.login,
-      version: 1,
-      createdAt: +new Date(),
-      updatedAt: +new Date(),
-    } as User;
-
-    this.users.push({
-      ...user,
-      password: body.password,
+  async update(body: UpdatePasswordDto, id: string) {
+    const user = await this.userRepository.findOneBy({
+      id,
     });
 
+    user.password = body.newPassword;
+    return (await this.userRepository.save(user)).toResponse();
+  }
+
+  async delete(id: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({
+      id,
+    });
+
+    if (user) await this.userRepository.remove(user);
     return user;
-  }
-
-  update(body: UpdatePasswordDto, id: string): User {
-    const index = this.users.findIndex((user) => user.id === id);
-    this.users[index] = {
-      ...this.users[index],
-      password: body.newPassword,
-      version: ++this.users[index].version,
-      updatedAt: +new Date(),
-    };
-
-    const updatedUser = JSON.parse(JSON.stringify(this.users[index]));
-    if (updatedUser) delete updatedUser.password;
-    return updatedUser;
-  }
-
-  delete(id: string): User {
-    const user = this.getDataById(id);
-    if (user) {
-      this.users = this.users.filter((user) => user.id !== id);
-      return user;
-    } else return null;
   }
 }
