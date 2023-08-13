@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlbumController } from 'src/modules/albums/album.controller';
 import { AlbumService } from 'src/modules/albums/album.service';
-import { ApiAlbumModule } from 'src/api/modules/api-albums/album.module';
-import { ApiTrackModule } from 'src/api/modules/api-tracks/track.module';
-import { ApiFavoriteModule } from 'src/api/modules/api-favorites/favorite.module';
+import { AlbumEntity } from './entities/album.entity';
 
 @Module({
-  imports: [ApiAlbumModule, ApiTrackModule, ApiFavoriteModule],
+  imports: [TypeOrmModule.forFeature([AlbumEntity])],
   controllers: [AlbumController],
   providers: [AlbumService],
   exports: [AlbumService],

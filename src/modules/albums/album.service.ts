@@ -1,64 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Album,
-  CreateAlbumDto,
-  UpdateAlbumDto,
-} from 'src/modules/albums/album.model';
-import { v4 } from 'uuid';
-import { ApiAlbumService } from 'src/api/modules/api-albums/album.service';
-import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
-import { ApiFavoriteService } from 'src/api/modules/api-favorites/favorite.service';
+import { CreateAlbumDto, UpdateAlbumDto } from 'src/modules/albums/album.model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AlbumEntity } from './entities/album.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
   constructor(
-    private apiAlbumService: ApiAlbumService,
-    private apiTrackService: ApiTrackService,
-    private apiFavoriteService: ApiFavoriteService,
+    @InjectRepository(AlbumEntity)
+    private albumRepository: Repository<AlbumEntity>,
   ) {}
 
-  getAllData(): Album[] {
-    const albums = this.apiAlbumService.getAll();
-    return JSON.parse(JSON.stringify(albums));
+  async getAllData(): Promise<AlbumEntity[]> {
+    return await this.albumRepository.find();
   }
 
-  getDataById(id: string): Album {
-    return this.apiAlbumService.getById(id);
+  async getDataById(id: string): Promise<AlbumEntity> {
+    return await this.albumRepository.findOneBy({
+      id,
+    });
   }
 
-  create(body: CreateAlbumDto): Album {
-    const albums = this.apiAlbumService.getAll();
+  async create(albumDto: CreateAlbumDto): Promise<AlbumEntity> {
+    const createdAlbum = this.albumRepository.create(albumDto);
+    return await this.albumRepository.save(createdAlbum);
+  }
 
-    const album: Album = {
-      id: v4(),
+  async update(body: UpdateAlbumDto, id: string): Promise<AlbumEntity> {
+    let album = await this.albumRepository.findOneBy({
+      id,
+    });
+
+    album = {
+      ...album,
       ...body,
     };
 
-    albums.push(album);
+    return await this.albumRepository.save(album);
+  }
 
+  async delete(id: string): Promise<AlbumEntity> {
+    const album = await this.albumRepository.findOneBy({
+      id,
+    });
+
+    if (album) await this.albumRepository.remove(album);
     return album;
-  }
-
-  update(body: UpdateAlbumDto, id: string): Album {
-    const albums = this.apiAlbumService.getAll<Album>();
-    const index = albums.findIndex((album) => album.id === id);
-    albums[index] = {
-      ...albums[index],
-      ...body,
-    };
-
-    return albums[index];
-  }
-
-  delete(id: string): Album {
-    const albums = this.apiAlbumService.getAll<Album>();
-    const album = this.getDataById(id);
-    if (album) {
-      const updatedAlbums = albums.filter((album) => album.id !== id);
-      this.apiAlbumService.updateAll(updatedAlbums);
-      this.apiTrackService.clearAlbumId(id);
-      this.apiFavoriteService.deleteAlbum(id);
-      return album;
-    } else return null;
   }
 }
