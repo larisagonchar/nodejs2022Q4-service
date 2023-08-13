@@ -13,8 +13,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ErrorMessage } from 'src/constants/error-message.constant';
-import { Artist, CreateArtistDto, UpdateArtistDto } from './artist.model';
+import { CreateArtistDto, UpdateArtistDto } from './artist.model';
 import { ArtistService } from './artist.service';
+import { ArtistEntity } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {
@@ -22,14 +23,16 @@ export class ArtistController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  getAllArtists(): Artist[] {
-    return this.artistService.getAllData();
+  async getAllArtists(): Promise<ArtistEntity[]> {
+    return await this.artistService.getAllData();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  getArtistById(@Param('id', ParseUUIDPipe) id: string): Artist {
-    const artist = this.artistService.getDataById(id);
+  async getArtistById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ArtistEntity> {
+    const artist = await this.artistService.getDataById(id);
     if (artist) return artist;
     else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
@@ -37,19 +40,21 @@ export class ArtistController {
 
   @Post()
   @Header('Content-Type', 'application/json')
-  createArtist(@Body() createDto: CreateArtistDto): Artist {
-    return this.artistService.create(createDto);
+  async createArtist(
+    @Body() createDto: CreateArtistDto,
+  ): Promise<ArtistEntity> {
+    return await this.artistService.create(createDto);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateArtistById(
+  async updateArtistById(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateArtistDto,
-  ): Artist {
-    const artist = this.artistService.getDataById(id);
+  ): Promise<ArtistEntity> {
+    const artist = await this.artistService.getDataById(id);
     if (artist) {
-      return this.artistService.update(updateDto, id);
+      return await this.artistService.update(updateDto, id);
     } else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
   }
@@ -57,8 +62,10 @@ export class ArtistController {
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteArtistById(@Param('id', ParseUUIDPipe) id: string): void {
-    const artist = this.artistService.delete(id);
+  async deleteArtistById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    const artist = await this.artistService.delete(id);
     if (artist) {
       return;
     } else

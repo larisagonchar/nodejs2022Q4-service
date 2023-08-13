@@ -1,62 +1,48 @@
 import { Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
-import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
-import { ApiAlbumService } from 'src/api/modules/api-albums/album.service';
-import { Artist, CreateArtistDto, UpdateArtistDto } from './artist.model';
-import { ApiArtistService } from 'src/api/modules/api-artists/artist.service';
-import { ApiFavoriteService } from 'src/api/modules/api-favorites/favorite.service';
+import { CreateArtistDto, UpdateArtistDto } from './artist.model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ArtistEntity } from './entities/artist.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
   constructor(
-    private apiArtistService: ApiArtistService,
-    private apiAlbumService: ApiAlbumService,
-    private apiTrackService: ApiTrackService,
-    private apiFavoriteService: ApiFavoriteService,
+    @InjectRepository(ArtistEntity)
+    private artistRepository: Repository<ArtistEntity>,
   ) {}
 
-  getAllData(): Artist[] {
-    const artists = this.apiArtistService.getAll();
-    return JSON.parse(JSON.stringify(artists));
+  async getAllData(): Promise<ArtistEntity[]> {
+    return await this.artistRepository.find();
   }
 
-  getDataById(id: string): Artist {
-    return this.apiArtistService.getById(id);
+  async getDataById(id: string): Promise<ArtistEntity> {
+    return await this.artistRepository.findOneBy({
+      id,
+    });
   }
 
-  create(body: CreateArtistDto): Artist {
-    const artists = this.apiArtistService.getAll();
-    const artist: Artist = {
-      id: v4(),
-      ...body,
-    };
+  async create(artistDto: CreateArtistDto): Promise<ArtistEntity> {
+    const createdArtist = this.artistRepository.create(artistDto);
+    return await this.artistRepository.save(createdArtist);
+  }
 
-    artists.push(artist);
+  async update(body: UpdateArtistDto, id: string): Promise<ArtistEntity> {
+    const artist = await this.artistRepository.findOneBy({
+      id,
+    });
 
+    artist.grammy = body.grammy;
+    artist.name = body.name;
+
+    return await this.artistRepository.save(artist);
+  }
+
+  async delete(id: string): Promise<ArtistEntity> {
+    const artist = await this.artistRepository.findOneBy({
+      id,
+    });
+
+    if (artist) await this.artistRepository.remove(artist);
     return artist;
-  }
-
-  update(body: UpdateArtistDto, id: string): Artist {
-    const artists = this.apiArtistService.getAll<Artist>();
-    const index = artists.findIndex((artist) => artist.id === id);
-    artists[index] = {
-      ...artists[index],
-      ...body,
-    };
-
-    return artists[index];
-  }
-
-  delete(id: string): Artist {
-    const artists = this.apiArtistService.getAll<Artist>();
-    const artist = this.getDataById(id);
-    if (artist) {
-      const updatedArtists = artists.filter((artist) => artist.id !== id);
-      this.apiArtistService.updateAll(updatedArtists);
-      this.apiAlbumService.clearArtistId(id);
-      this.apiTrackService.clearArtistId(id);
-      this.apiFavoriteService.deleteArtist(id);
-      return artist;
-    } else return null;
   }
 }
