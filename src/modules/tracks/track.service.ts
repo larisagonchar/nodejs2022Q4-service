@@ -1,61 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { ApiFavoriteService } from 'src/api/modules/api-favorites/favorite.service';
-import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
-import {
-  CreateTrackDto,
-  Track,
-  UpdateTrackDto,
-} from 'src/modules/tracks/track.model';
-import { v4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateTrackDto, UpdateTrackDto } from 'src/modules/tracks/track.model';
+import { Repository } from 'typeorm';
+import { TrackEntity } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
   constructor(
-    private apiTrackService: ApiTrackService,
-    private apiFavoriteService: ApiFavoriteService,
+    @InjectRepository(TrackEntity)
+    private trackRepository: Repository<TrackEntity>,
   ) {}
 
-  getAllData(): Track[] {
-    const tracks = this.apiTrackService.getAll();
-    return JSON.parse(JSON.stringify(tracks));
+  async getAllData(): Promise<TrackEntity[]> {
+    return await this.trackRepository.find();
   }
 
-  getDataById(id: string): Track {
-    return this.apiTrackService.getById(id);
+  async getDataById(id: string): Promise<TrackEntity> {
+    return await this.trackRepository.findOneBy({
+      id,
+    });
   }
 
-  create(body: CreateTrackDto): Track {
-    const tracks = this.apiTrackService.getAll();
+  async create(trackDto: CreateTrackDto): Promise<TrackEntity> {
+    const createdTrack = this.trackRepository.create(trackDto);
+    return await this.trackRepository.save(createdTrack);
+  }
 
-    const track: Track = {
-      id: v4(),
+  async update(body: UpdateTrackDto, id: string): Promise<TrackEntity> {
+    let track = await this.trackRepository.findOneBy({
+      id,
+    });
+
+    track = {
+      ...track,
       ...body,
     };
 
-    tracks.push(track);
+    return await this.trackRepository.save(track);
+  }
 
+  async delete(id: string): Promise<TrackEntity> {
+    const track = await this.trackRepository.findOneBy({
+      id,
+    });
+
+    if (track) await this.trackRepository.remove(track);
     return track;
-  }
-
-  update(body: UpdateTrackDto, id: string): Track {
-    const tracks = this.apiTrackService.getAll<Track>();
-    const index = tracks.findIndex((track) => track.id === id);
-    tracks[index] = {
-      ...tracks[index],
-      ...body,
-    };
-
-    return tracks[index];
-  }
-
-  delete(id: string): Track {
-    const tracks = this.apiTrackService.getAll<Track>();
-    const track = this.getDataById(id);
-    if (track) {
-      const updatedTracks = tracks.filter((track) => track.id !== id);
-      this.apiTrackService.updateAll(updatedTracks);
-      this.apiFavoriteService.deleteTrack(id);
-      return track;
-    } else return null;
   }
 }
