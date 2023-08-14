@@ -13,12 +13,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ErrorMessage } from 'src/constants/error-message.constant';
-import {
-  CreateTrackDto,
-  Track,
-  UpdateTrackDto,
-} from 'src/modules/tracks/track.model';
+import { CreateTrackDto, UpdateTrackDto } from 'src/modules/tracks/track.model';
 import { TrackService } from 'src/modules/tracks/track.service';
+import { TrackEntity } from './entities/track.entity';
 
 @Controller('track')
 export class TrackController {
@@ -26,14 +23,16 @@ export class TrackController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  getAllTracks(): Track[] {
-    return this.trackService.getAllData();
+  async getAllTracks(): Promise<TrackEntity[]> {
+    return await this.trackService.getAllData();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  getTrackById(@Param('id', ParseUUIDPipe) id: string): Track {
-    const track = this.trackService.getDataById(id);
+  async getTrackById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<TrackEntity> {
+    const track = await this.trackService.getDataById(id);
     if (track) return track;
     else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
@@ -41,19 +40,19 @@ export class TrackController {
 
   @Post()
   @Header('Content-Type', 'application/json')
-  createTrack(@Body() createDto: CreateTrackDto): Track {
-    return this.trackService.create(createDto);
+  async createTrack(@Body() createDto: CreateTrackDto): Promise<TrackEntity> {
+    return await this.trackService.create(createDto);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateTrackById(
+  async updateTrackById(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateTrackDto,
-  ): Track {
-    const track = this.trackService.getDataById(id);
+  ): Promise<TrackEntity> {
+    const track = await this.trackService.getDataById(id);
     if (track) {
-      return this.trackService.update(updateDto, id);
+      return await this.trackService.update(updateDto, id);
     } else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
   }
@@ -61,8 +60,8 @@ export class TrackController {
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrackById(@Param('id', ParseUUIDPipe) id: string): void {
-    const track = this.trackService.delete(id);
+  async deleteTrackById(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    const track = await this.trackService.delete(id);
     if (track) {
       return;
     } else
