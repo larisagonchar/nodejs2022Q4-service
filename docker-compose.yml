@@ -3,7 +3,7 @@ version: '3'
 services:
   node:
     build: .
-    image: node
+    image: larisa12/node
     restart: always
     environment:
       - PORT=${PORT}
@@ -22,7 +22,7 @@ services:
 
   postgres:
     build: ./db/
-    image: postgres
+    image: larisa12/postgres
     restart: always
     environment:
       - POSTGRES_PORT=${POSTGRES_PORT}
