@@ -11,6 +11,12 @@
 git clone https://github.com/larisagonchar/nodejs2022Q4-service.git
 ```
 
+## Changing branch
+
+```
+git checkout dev_docker-db
+```
+
 ## Installing NPM modules
 
 ```
