@@ -8,7 +8,7 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/larisagonchar/nodejs2022Q4-service.git
 ```
 
 ## Installing NPM modules
@@ -17,14 +17,29 @@ git clone {repository URL}
 npm install
 ```
 
-## Running application
+## Running application in docker
+
+1. Download and install [Docker](https://docs.docker.com/engine/install/)
+2. Run command
 
 ```
-npm start
+npm run docker:start
 ```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+
+## Stop application in docker
+
+```
+npm run docker:down
+```
+
+## Scan docker images
+
+```
+npm run docker:scan
+```
 
 ## Testing
 
