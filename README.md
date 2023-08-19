@@ -14,7 +14,7 @@ git clone https://github.com/larisagonchar/nodejs2022Q4-service.git
 ## Changing branch
 
 ```
-git checkout dev_docker-db
+git checkout dev_logs-errors-auth
 ```
 
 ## Installing NPM modules
@@ -51,16 +51,16 @@ npm run docker:scan
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests with authorization
 
 ```
-npm run test
+npm run test:auth
 ```
 
 To run only one of all test suites
 
 ```
-npm run test -- <path to suite>
+npm run test:auth -- <path to suite>
 ```
 
 ### Auto-fix and format
