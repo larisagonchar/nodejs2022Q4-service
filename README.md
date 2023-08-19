@@ -8,7 +8,13 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/larisagonchar/nodejs2022Q4-service.git
+```
+
+## Changing branch
+
+```
+git checkout dev_logs-errors-auth
 ```
 
 ## Installing NPM modules
@@ -17,29 +23,44 @@ git clone {repository URL}
 npm install
 ```
 
-## Running application
+## Running application in docker
+
+1. Download and install [Docker](https://docs.docker.com/engine/install/)
+2. Run command
 
 ```
-npm start
+npm run docker:start
 ```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 
+## Stop application in docker
+
+```
+npm run docker:down
+```
+
+## Scan docker images
+
+```
+npm run docker:scan
+```
+
 ## Testing
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests with authorization
 
 ```
-npm run test
+npm run test:auth
 ```
 
 To run only one of all test suites
 
 ```
-npm run test -- <path to suite>
+npm run test:auth -- <path to suite>
 ```
 
 ### Auto-fix and format

@@ -13,7 +13,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ErrorMessage } from 'src/constants/error-message.constant';
-import { CreateUserDto, UpdatePasswordDto, User } from './user.model';
+import { CreateUserDto, UpdatePasswordDto } from './user.model';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -22,16 +22,15 @@ export class UserController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  getAllUsers(): User[] {
-    return this.userService.getAllData();
+  async getAllUsers() {
+    return await this.userService.getAllData();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  getUserById(@Param('id', ParseUUIDPipe) id: string): User {
-    const user = this.userService.getDataById(id);
+  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.userService.getDataById(id);
     if (user) {
-      delete user.password;
       return user;
     } else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
@@ -39,17 +38,17 @@ export class UserController {
 
   @Post()
   @Header('Content-Type', 'application/json')
-  createUser(@Body() createDto: CreateUserDto): User {
-    return this.userService.create(createDto);
+  async createUser(@Body() createDto: CreateUserDto) {
+    return await this.userService.create(createDto);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateUserById(
+  async updateUserById(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdatePasswordDto,
-  ): User {
-    const user = this.userService.getDataById(id);
+  ) {
+    const user = await this.userService.getFullDataById(id);
     if (user) {
       if (user.password === updateDto.oldPassword)
         return this.userService.update(updateDto, id);
@@ -65,8 +64,8 @@ export class UserController {
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteUserById(@Param('id', ParseUUIDPipe) id: string): void {
-    const user = this.userService.delete(id);
+  async deleteUserById(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.userService.delete(id);
     if (user) return;
     else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);

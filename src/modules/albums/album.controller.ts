@@ -13,12 +13,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ErrorMessage } from 'src/constants/error-message.constant';
-import {
-  Album,
-  CreateAlbumDto,
-  UpdateAlbumDto,
-} from 'src/modules/albums/album.model';
+import { CreateAlbumDto, UpdateAlbumDto } from 'src/modules/albums/album.model';
 import { AlbumService } from 'src/modules/albums/album.service';
+import { AlbumEntity } from './entities/album.entity';
 
 @Controller('album')
 export class AlbumController {
@@ -26,14 +23,16 @@ export class AlbumController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  getAllAlbums(): Album[] {
-    return this.albumService.getAllData();
+  async getAllAlbums(): Promise<AlbumEntity[]> {
+    return await this.albumService.getAllData();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  getAlbumById(@Param('id', ParseUUIDPipe) id: string): Album {
-    const album = this.albumService.getDataById(id);
+  async getAlbumById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AlbumEntity> {
+    const album = await this.albumService.getDataById(id);
     if (album) return album;
     else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
@@ -41,19 +40,19 @@ export class AlbumController {
 
   @Post()
   @Header('Content-Type', 'application/json')
-  createAlbum(@Body() createDto: CreateAlbumDto): Album {
-    return this.albumService.create(createDto);
+  async createAlbum(@Body() createDto: CreateAlbumDto): Promise<AlbumEntity> {
+    return await this.albumService.create(createDto);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateAlbumById(
+  async updateAlbumById(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateAlbumDto,
-  ): Album {
-    const album = this.albumService.getDataById(id);
+  ): Promise<AlbumEntity> {
+    const album = await this.albumService.getDataById(id);
     if (album) {
-      return this.albumService.update(updateDto, id);
+      return await this.albumService.update(updateDto, id);
     } else
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
   }
@@ -61,8 +60,8 @@ export class AlbumController {
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteAlbumById(@Param('id', ParseUUIDPipe) id: string): void {
-    const album = this.albumService.delete(id);
+  async deleteAlbumById(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    const album = await this.albumService.delete(id);
     if (album) {
       return;
     } else

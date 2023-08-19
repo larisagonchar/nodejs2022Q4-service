@@ -11,36 +11,23 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { FavoriteService } from 'src/modules/favorites/favorite.service';
-import { Favorite } from './favorite.model';
 import { ErrorMessage } from 'src/constants/error-message.constant';
-import { ApiTrackService } from 'src/api/modules/api-tracks/track.service';
-import { ApiAlbumService } from 'src/api/modules/api-albums/album.service';
-import { ApiArtistService } from 'src/api/modules/api-artists/artist.service';
-import { Album } from '../albums/album.model';
-import { Track } from '../tracks/track.model';
-import { Artist } from '../artists/artist.model';
 
 @Controller('favs')
 export class FavoriteController {
-  constructor(
-    private favoriteService: FavoriteService,
-    private apiTrackService: ApiTrackService,
-    private apiAlbumService: ApiAlbumService,
-    private apiArtistService: ApiArtistService,
-  ) {}
+  constructor(private favoriteService: FavoriteService) {}
 
   @Get()
   @Header('Content-Type', 'application/json')
-  getAllData(): Favorite {
-    return this.favoriteService.getAllData();
+  async getAllData() {
+    return await this.favoriteService.getAllData();
   }
 
   @Post('track/:id')
   @Header('Content-Type', 'application/json')
-  addTrack(@Param('id', ParseUUIDPipe) id: string): void {
-    const track = this.apiTrackService.getById<Track>(id);
+  async addTrack(@Param('id', ParseUUIDPipe) id: string) {
+    const track = await this.favoriteService.addTrack(id);
     if (track) {
-      this.favoriteService.addTrack(track);
       return;
     } else {
       throw new HttpException(
@@ -53,12 +40,9 @@ export class FavoriteController {
   @Delete('track/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrack(@Param('id', ParseUUIDPipe) id: string): void {
-    const isTrackExist = this.favoriteService
-      .getAllData()
-      .tracks.find((track) => track.id === id);
-    if (isTrackExist) {
-      this.favoriteService.deleteTrack(id);
+  async deleteTrack(@Param('id', ParseUUIDPipe) id: string) {
+    const track = await this.favoriteService.deleteTrack(id);
+    if (track) {
       return;
     } else {
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);
@@ -67,10 +51,9 @@ export class FavoriteController {
 
   @Post('album/:id')
   @Header('Content-Type', 'application/json')
-  addAlbum(@Param('id', ParseUUIDPipe) id: string): void {
-    const album = this.apiAlbumService.getById<Album>(id);
+  async addAlbum(@Param('id', ParseUUIDPipe) id: string) {
+    const album = await this.favoriteService.addAlbum(id);
     if (album) {
-      this.favoriteService.addAlbum(album);
       return;
     } else {
       throw new HttpException(
@@ -83,11 +66,9 @@ export class FavoriteController {
   @Delete('album/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteAlbum(@Param('id', ParseUUIDPipe) id: string): void {
-    const isAlbumExist = this.favoriteService
-      .getAllData()
-      .albums.find((album) => album.id === id);
-    if (isAlbumExist) {
+  async deleteAlbum(@Param('id', ParseUUIDPipe) id: string) {
+    const album = await this.favoriteService.deleteAlbum(id);
+    if (album) {
       this.favoriteService.deleteAlbum(id);
       return;
     } else {
@@ -97,10 +78,9 @@ export class FavoriteController {
 
   @Post('artist/:id')
   @Header('Content-Type', 'application/json')
-  addArtist(@Param('id', ParseUUIDPipe) id: string): void {
-    const artist = this.apiArtistService.getById<Artist>(id);
+  async addArtist(@Param('id', ParseUUIDPipe) id: string) {
+    const artist = await this.favoriteService.addArtist(id);
     if (artist) {
-      this.favoriteService.addArtist(artist);
       return;
     } else {
       throw new HttpException(
@@ -113,12 +93,9 @@ export class FavoriteController {
   @Delete('artist/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteArtist(@Param('id', ParseUUIDPipe) id: string): void {
-    const isArtistExist = this.favoriteService
-      .getAllData()
-      .artists.find((artist) => artist.id === id);
-    if (isArtistExist) {
-      this.favoriteService.deleteArtist(id);
+  async deleteArtist(@Param('id', ParseUUIDPipe) id: string) {
+    const artist = await this.favoriteService.deleteArtist(id);
+    if (artist) {
       return;
     } else {
       throw new HttpException(ErrorMessage.ID_NOT_EXIST, HttpStatus.NOT_FOUND);

@@ -1,11 +1,11 @@
 import { TrackService } from 'src/modules/tracks/track.service';
 import { TrackController } from 'src/modules/tracks/track.controller';
 import { Module } from '@nestjs/common';
-import { ApiTrackModule } from 'src/api/modules/api-tracks/track.module';
-import { ApiFavoriteModule } from 'src/api/modules/api-favorites/favorite.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TrackEntity } from './entities/track.entity';
 
 @Module({
-  imports: [ApiTrackModule, ApiFavoriteModule],
+  imports: [TypeOrmModule.forFeature([TrackEntity])],
   controllers: [TrackController],
   providers: [TrackService],
   exports: [TrackService],
