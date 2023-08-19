@@ -11,6 +11,10 @@ import { ArtistModule } from './modules/artists/artist.module';
 import { TrackModule } from './modules/tracks/track.module';
 import { FavoriteModule } from './modules/favorites/favorite.module';
 import { FavoritesEntity } from './modules/favorites/entities/favorites.entity';
+import { AuthModule } from './modules/auth/auth.module';
+import { AuthEntity } from './modules/auth/entities/auth.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './modules/auth/auth.guard';
 
 @Module({
   imports: [
@@ -28,6 +32,7 @@ import { FavoritesEntity } from './modules/favorites/entities/favorites.entity';
         ArtistEntity,
         AlbumEntity,
         FavoritesEntity,
+        AuthEntity,
       ],
       synchronize: true,
       logging: true,
@@ -37,6 +42,13 @@ import { FavoritesEntity } from './modules/favorites/entities/favorites.entity';
     FavoriteModule,
     TrackModule,
     UserModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
